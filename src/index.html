@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Séance Search</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="scanlines"></div>
+  <div id="flicker"></div>
+
+  <div id="app">
+    <header id="titlebar">
+      <div id="logo">
+        <span id="planchette">&#10014;</span>
+        <span id="app-title">SÉANCE SEARCH</span>
+        <span id="app-sub">necromancer for the dead internet</span>
+      </div>
+      <div id="header-actions">
+        <button id="btn-grimoire" class="header-btn" title="Open Grimoire">&#9780; GRIMOIRE</button>
+        <button id="btn-settings" class="header-btn" title="Settings">&#9881; SETTINGS</button>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section id="summon-section">
+        <div id="pentagram-container">
+          <svg id="pentagram" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="90" fill="none" stroke="#00ff41" stroke-width="0.5" opacity="0.3"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="#00ff41" stroke-width="0.3" opacity="0.2"/>
+            <polygon points="100,15 185,145 20,60 180,60 15,145" fill="none" stroke="#00ff41" stroke-width="0.8" opacity="0.4"/>
+          </svg>
+        </div>
+
+        <div id="search-container">
+          <label id="search-label">WHAT SPIRIT DO YOU SEEK?</label>
+          <div id="search-wrapper">
+            <input
+              type="text"
+              id="search-input"
+              placeholder="tamagotchi care guides... early bitcoin manifestos... geocities fan shrines..."
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button id="summon-btn">
+              <span id="summon-text">SUMMON</span>
+              <span id="summon-spinner" class="hidden">&#9770;</span>
+            </button>
+          </div>
+          <div id="search-hint">Press Enter or click SUMMON to commune with the dead</div>
+        </div>
+      </section>
+
+      <section id="results-section" class="hidden">
+        <div id="results-header">
+          <span id="results-title">&#9770; MANIFESTATIONS</span>
+          <span id="results-query"></span>
+        </div>
+        <div id="results-grid"></div>
+      </section>
+
+      <section id="empty-state" class="hidden">
+        <div id="empty-msg">
+          <p>The spirits are silent for this query.</p>
+          <p>The archive holds no dead links here.</p>
+          <p>Try different words to disturb the dead.</p>
+        </div>
+      </section>
+
+      <section id="error-state" class="hidden">
+        <div id="error-msg"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal-overlay" class="hidden">
+    <div id="grimoire-modal" class="modal hidden">
+      <div class="modal-header">
+        <span class="modal-title">&#9780; THE GRIMOIRE</span>
+        <button class="modal-close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">Spirits you have previously summoned. They remember you.</p>
+        <div id="grimoire-list"></div>
+      </div>
+    </div>
+
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-header">
+        <span class="modal-title">&#9881; SETTINGS</span>
+        <button class="modal-close">&#10005;</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-group">
+          <label class="setting-label">GROQ API KEY</label>
+          <p class="setting-desc">Required to channel the dead. Get a free key at console.groq.com</p>
+          <input type="password" id="groq-api-key" class="setting-input" placeholder="gsk_..." autocomplete="off" />
+        </div>
+        <div class="setting-group">
+          <label class="setting-label">TEXT-TO-SPEECH</label>
+          <p class="setting-desc">Let the ghosts speak aloud through your device</p>
+          <label class="toggle-label">
+            <input type="checkbox" id="tts-enabled" />
+            <span class="toggle-track">
+              <span class="toggle-thumb"></span>
+            </span>
+            <span>Enable possession (TTS)</span>
+          </label>
+        </div>
+        <div class="setting-group">
+          <label class="setting-label">VOICE SPEED</label>
+          <input type="range" id="tts-rate" min="0.5" max="2" step="0.1" value="0.9" class="setting-range" />
+          <span id="tts-rate-label">0.9x</span>
+        </div>
+        <button id="save-settings-btn" class="btn-primary">BIND SETTINGS</button>
+        <div id="settings-saved" class="hidden save-confirm">Settings bound to the grimoire.</div>
+      </div>
+    </div>
+  </div>
+
+  <template id="card-template">
+    <div class="ghost-card" data-url="">
+      <div class="card-inner">
+        <div class="card-header">
+          <span class="card-era-badge"></span>
+          <span class="card-confidence"></span>
+        </div>
+        <div class="card-domain"></div>
+        <div class="card-url"></div>
+        <div class="card-timestamp"></div>
+        <div class="card-divider"></div>
+        <div class="card-personality"></div>
+        <div class="card-response"></div>
+        <div class="card-footer">
+          <div class="ectoplasm-container">
+            <span class="ectoplasm-label">ECTOPLASM</span>
+            <div class="ectoplasm-bar">
+              <div class="ectoplasm-fill"></div>
+            </div>
+            <span class="ectoplasm-value"></span>
+          </div>
+          <div class="card-actions">
+            <button class="card-btn tts-btn" title="Possess speaker (TTS)">&#9654; POSSESS</button>
+            <button class="card-btn wayback-btn" title="View in Wayback Machine">&#9768; WAYBACK</button>
+          </div>
+        </div>
+        <div class="card-prior-visits hidden">
+          <span class="prior-label">&#9670; This spirit remembers you</span>
+          <span class="prior-count"></span>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

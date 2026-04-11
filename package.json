@@ -1,0 +1,40 @@
+{
+  "name": "seance-search",
+  "version": "1.0.0",
+  "description": "A Desktop Necromancer for the Dead Internet",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --publish never",
+    "pack": "electron-builder --dir --publish never"
+  },
+  "build": {
+    "appId": "com.seance.search",
+    "productName": "Seance Search",
+    "asar": true,
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "zip",
+          "arch": ["x64"]
+        }
+      ],
+      "sign": null,
+      "signingHashAlgorithms": null,
+      "signAndEditExecutable": false
+    }
+  },
+  "devDependencies": {
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.3"
+  }
+}
