@@ -2,16 +2,18 @@
   "name": "seance-search",
   "version": "1.0.0",
   "description": "A Desktop Necromancer for the Dead Internet",
-  "main": "server.js",
+  "main": "main.js",
   "scripts": {
     "start": "node server.js",
-    "start:electron": "electron .",
+    "electron": "electron .",
     "build": "electron-builder --win --publish never",
+    "build:zip": "electron-builder --win zip --publish never",
     "pack": "electron-builder --dir --publish never"
   },
   "build": {
     "appId": "com.seance.search",
-    "productName": "Seance Search",
+    "productName": "SÉANCE SEARCH",
+    "executableName": "SEANCE-SEARCH",
     "asar": true,
     "files": [
       "main.js",
@@ -19,16 +21,22 @@
       "src/**/*",
       "node_modules/**/*"
     ],
+    "extraFiles": [],
     "win": {
       "target": [
         {
-          "target": "zip",
-          "arch": ["x64"]
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
         }
       ],
       "sign": null,
       "signingHashAlgorithms": null,
       "signAndEditExecutable": false
+    },
+    "portable": {
+      "artifactName": "SEANCE-SEARCH.exe"
     }
   },
   "devDependencies": {
@@ -36,7 +44,7 @@
     "electron-builder": "^24.9.1"
   },
   "dependencies": {
-    "better-sqlite3": "^9.4.3",
+    "better-sqlite3": "^9.6.0",
     "express": "^4.19.2"
   }
 }

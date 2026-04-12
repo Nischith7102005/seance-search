@@ -1,0 +1,25 @@
+directories:
+  output: dist
+  buildResources: build
+appId: com.seance.search
+productName: SÉANCE SEARCH
+executableName: SEANCE-SEARCH
+asar: true
+files:
+  - filter:
+      - main.js
+      - preload.js
+      - src/**/*
+      - node_modules/**/*
+extraFiles: []
+win:
+  target:
+    - target: portable
+      arch:
+        - x64
+  sign: null
+  signingHashAlgorithms: null
+  signAndEditExecutable: false
+portable:
+  artifactName: SEANCE-SEARCH.exe
+electronVersion: 28.3.3

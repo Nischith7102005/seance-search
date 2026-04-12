@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const { initGrimoire, saveGhost, getGhost, getAllGhosts, saveSettings, getSettings } = require('./src/grimoire-web');
 const { searchWayback } = require('./src/wayback');
-const { channelGhost } = require('./src/groq-client');
+const { channelGhost } = require('./src/ai-client');
 
 const app = express();
 const PORT = 5000;
@@ -13,7 +13,7 @@ app.use(express.static(path.join(__dirname, 'src')));
 initGrimoire();
 
 app.post('/api/summon', async (req, res) => {
-  const { query, apiKey } = req.body;
+  const { query } = req.body;
   try {
     const deadUrls = await searchWayback(query);
 
@@ -23,15 +23,10 @@ app.post('/api/summon', async (req, res) => {
 
     const results = [];
 
-    for (const urlData of deadUrls.slice(0, 5)) {
+    for (const urlData of deadUrls) {
       const priorMemory = getGhost(urlData.url);
 
-      const ghost = await channelGhost({
-        query,
-        urlData,
-        priorMemory,
-        apiKey
-      });
+      const ghost = await channelGhost({ query, urlData, priorMemory });
 
       if (ghost && !ghost.error) {
         saveGhost({
