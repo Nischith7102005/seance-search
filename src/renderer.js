@@ -28,17 +28,21 @@ let ttsActive = false;
 let currentSpeech = null;
 
 async function loadSettings() {
-  const settings = await window.seance.getSettings();
-  if (settings.groqApiKey) {
-    currentApiKey = settings.groqApiKey;
-    groqApiKeyInput.value = settings.groqApiKey;
-  }
-  if (settings.ttsEnabled === 'true') {
-    ttsEnabled.checked = true;
-  }
-  if (settings.ttsRate) {
-    ttsRate.value = settings.ttsRate;
-    ttsRateLabel.textContent = `${parseFloat(settings.ttsRate).toFixed(1)}x`;
+  try {
+    const settings = await fetch('/api/settings').then(r => r.json());
+    if (settings.groqApiKey) {
+      currentApiKey = settings.groqApiKey;
+      groqApiKeyInput.value = settings.groqApiKey;
+    }
+    if (settings.ttsEnabled === 'true') {
+      ttsEnabled.checked = true;
+    }
+    if (settings.ttsRate) {
+      ttsRate.value = settings.ttsRate;
+      ttsRateLabel.textContent = `${parseFloat(settings.ttsRate).toFixed(1)}x`;
+    }
+  } catch (e) {
+    console.error('Failed to load settings', e);
   }
 }
 
@@ -55,7 +59,11 @@ async function performSummon() {
   hideAllResults();
 
   try {
-    const result = await window.seance.summon(query, currentApiKey);
+    const result = await fetch('/api/summon', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, apiKey: currentApiKey })
+    }).then(r => r.json());
 
     if (result.error) {
       showError(result.error);
@@ -183,7 +191,8 @@ function buildCard(result) {
   const waybackBtn = card.querySelector('.wayback-btn');
   waybackBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    window.seance.openWayback(result.url);
+    const waybackUrl = `https://web.archive.org/web/*/${result.url}`;
+    window.open(waybackUrl, '_blank');
   });
 
   return frag;
@@ -231,31 +240,35 @@ function speakResponse(text, btn) {
 }
 
 async function openGrimoire() {
-  const ghosts = await window.seance.getGrimoire();
-  grimoireList.innerHTML = '';
+  try {
+    const ghosts = await fetch('/api/grimoire').then(r => r.json());
+    grimoireList.innerHTML = '';
 
-  if (!ghosts || ghosts.length === 0) {
-    grimoireList.innerHTML = '<div class="grimoire-empty">No spirits bound yet.<br>Summon the dead to fill your grimoire.</div>';
-  } else {
-    for (const ghost of ghosts) {
-      const entry = document.createElement('div');
-      entry.className = 'grimoire-entry';
-      const lastDate = new Date(ghost.last_summoned).toLocaleDateString();
-      entry.innerHTML = `
-        <div class="grimoire-domain">${ghost.domain}</div>
-        <div class="grimoire-meta">
-          <span>Era: ${ghost.era || 'Unknown'}</span>
-          <span>Visits: ${ghost.visit_count}</span>
-          <span>Last summoned: ${lastDate}</span>
-          <span>Last query: "${ghost.last_query || '—'}"</span>
-        </div>
-      `;
-      entry.addEventListener('click', () => {
-        searchInput.value = ghost.last_query || ghost.domain;
-        closeModal();
-      });
-      grimoireList.appendChild(entry);
+    if (!ghosts || ghosts.length === 0) {
+      grimoireList.innerHTML = '<div class="grimoire-empty">No spirits bound yet.<br>Summon the dead to fill your grimoire.</div>';
+    } else {
+      for (const ghost of ghosts) {
+        const entry = document.createElement('div');
+        entry.className = 'grimoire-entry';
+        const lastDate = new Date(ghost.last_summoned).toLocaleDateString();
+        entry.innerHTML = `
+          <div class="grimoire-domain">${ghost.domain}</div>
+          <div class="grimoire-meta">
+            <span>Era: ${ghost.era || 'Unknown'}</span>
+            <span>Visits: ${ghost.visit_count}</span>
+            <span>Last summoned: ${lastDate}</span>
+            <span>Last query: "${ghost.last_query || '—'}"</span>
+          </div>
+        `;
+        entry.addEventListener('click', () => {
+          searchInput.value = ghost.last_query || ghost.domain;
+          closeModal();
+        });
+        grimoireList.appendChild(entry);
+      }
     }
+  } catch (e) {
+    grimoireList.innerHTML = '<div class="grimoire-empty">Failed to load grimoire.</div>';
   }
 
   openModal(grimoireModal);
@@ -294,10 +307,14 @@ saveSettingsBtn.addEventListener('click', async () => {
   const apiKey = groqApiKeyInput.value.trim();
   currentApiKey = apiKey;
 
-  await window.seance.saveSettings({
-    groqApiKey: apiKey,
-    ttsEnabled: ttsEnabled.checked ? 'true' : 'false',
-    ttsRate: ttsRate.value
+  await fetch('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      groqApiKey: apiKey,
+      ttsEnabled: ttsEnabled.checked ? 'true' : 'false',
+      ttsRate: ttsRate.value
+    })
   });
 
   settingsSaved.classList.remove('hidden');

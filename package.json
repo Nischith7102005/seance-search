@@ -2,9 +2,10 @@
   "name": "seance-search",
   "version": "1.0.0",
   "description": "A Desktop Necromancer for the Dead Internet",
-  "main": "main.js",
+  "main": "server.js",
   "scripts": {
-    "start": "electron .",
+    "start": "node server.js",
+    "start:electron": "electron .",
     "build": "electron-builder --win --publish never",
     "pack": "electron-builder --dir --publish never"
   },
@@ -35,6 +36,7 @@
     "electron-builder": "^24.9.1"
   },
   "dependencies": {
-    "better-sqlite3": "^9.4.3"
+    "better-sqlite3": "^9.4.3",
+    "express": "^4.19.2"
   }
 }
