@@ -7,11 +7,6 @@
   let width = canvas.width = window.innerWidth;
   let height = canvas.height = window.innerHeight;
 
-  window.addEventListener('resize', () => {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
-  });
-
   function noise(x) {
     return Math.sin(x) * 0.5 + Math.sin(x * 2.1) * 0.25 + Math.sin(x * 4.3) * 0.125;
   }
@@ -166,16 +161,23 @@
   }
 
   let strokes = [];
+  let animFrameId = null;
   function animate() {
     let anyActive = false;
     strokes.forEach(s => {
       s.update();
       if (s.active || s.delay > 0) anyActive = true;
     });
-    if (anyActive) requestAnimationFrame(animate);
+    if (anyActive) animFrameId = requestAnimationFrame(animate);
+    else animFrameId = null;
   }
 
   function initStrokes() {
+    if (animFrameId !== null) {
+      cancelAnimationFrame(animFrameId);
+      animFrameId = null;
+    }
+    ctx.clearRect(0, 0, width, height);
     strokes = [];
     const topRegion = height * 0.12;
     const bottomRegion = height * 0.88;
@@ -191,6 +193,14 @@
     }
     animate();
   }
+
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => initStrokes(), 250);
+  });
 
   window.addEventListener('load', () => {
     initStrokes();

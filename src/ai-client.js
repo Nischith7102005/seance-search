@@ -1,6 +1,6 @@
 const https = require('https');
 
-const OPENROUTER_API_KEY = process.env.OPENAI_API_KEY;
+const OPENROUTER_API_KEY = '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';
 const AI_MODEL = 'z-ai/glm-4.5-air:free';
 
 const ERA_PERSONALITIES = {
