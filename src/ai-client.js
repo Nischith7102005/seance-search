@@ -1,7 +1,10 @@
 const https = require('https');
 
 const OPENROUTER_API_KEY = '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';
-const AI_MODEL = 'z-ai/glm-4.5-air:free';
+const AI_MODELS = [
+  'google/gemma-3-12b-it:free',
+  'google/gemma-3-4b-it:free'
+];
 
 const ERA_PERSONALITIES = {
   geocities: {
@@ -139,10 +142,10 @@ Respond as this ghost would, speaking directly to the summoner. Be specific to y
 Keep your response to 3-5 paragraphs. Be creative, era-appropriate, and haunting. Stay in character completely.`;
 }
 
-function callOpenRouterApi(prompt) {
+function callOpenRouterApi(prompt, model) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
-      model: AI_MODEL,
+      model: model,
       messages: [
         {
           role: 'user',
@@ -199,18 +202,24 @@ async function channelGhost({ query, urlData, priorMemory }) {
 
   const prompt = buildPrompt({ query, urlData, priorMemory, personality });
 
-  try {
-    const response = await callOpenRouterApi(prompt);
-
-    return {
-      response,
-      personality: personality.name,
-      ectoplasm: clampedEctoplasm,
-      confidence
-    };
-  } catch (err) {
-    return { error: err.message };
+  let lastError;
+  for (const model of AI_MODELS) {
+    try {
+      const response = await callOpenRouterApi(prompt, model);
+      if (response && response.trim().length > 0) {
+        return {
+          response,
+          personality: personality.name,
+          ectoplasm: clampedEctoplasm,
+          confidence
+        };
+      }
+    } catch (err) {
+      lastError = err;
+    }
   }
+
+  return { error: lastError ? lastError.message : 'All AI models failed to respond.' };
 }
 
 module.exports = { channelGhost };
