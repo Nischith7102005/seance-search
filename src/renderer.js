@@ -232,17 +232,9 @@ const errorState = document.getElementById('error-state');
 const errorMsg = document.getElementById('error-msg');
 const modalOverlay = document.getElementById('modal-overlay');
 const grimoireModal = document.getElementById('grimoire-modal');
-const settingsModal = document.getElementById('settings-modal');
 const grimoireList = document.getElementById('grimoire-list');
-const ttsEnabled = document.getElementById('tts-enabled');
-const ttsRate = document.getElementById('tts-rate');
-const ttsRateLabel = document.getElementById('tts-rate-label');
-const saveSettingsBtn = document.getElementById('save-settings-btn');
-const settingsSaved = document.getElementById('settings-saved');
 const cardTemplate = document.getElementById('card-template');
 const progressFill = document.getElementById('progress-fill');
-
-let currentSpeech = null;
 
 function showView(view) {
   [viewSearch, viewLoading, viewResults].forEach(v => {
@@ -265,17 +257,6 @@ function startProgress() {
 function finishProgress() {
   clearInterval(progressInterval);
   progressFill.style.width = '100%';
-}
-
-async function loadSettings() {
-  try {
-    const settings = await (window.seance ? window.seance.getSettings() : fetch('/api/settings').then(r => r.json()));
-    if (settings.ttsEnabled === 'true') ttsEnabled.checked = true;
-    if (settings.ttsRate) {
-      ttsRate.value = settings.ttsRate;
-      ttsRateLabel.textContent = `${parseFloat(settings.ttsRate).toFixed(1)}x`;
-    }
-  } catch {}
 }
 
 async function performSummon() {
@@ -358,9 +339,6 @@ function buildCard(result) {
     card.querySelector('.prior-count').textContent = `Summoned ${result.priorVisits} time${result.priorVisits !== 1 ? 's' : ''} before`;
   }
 
-  const ttsBtn = card.querySelector('.tts-btn');
-  ttsBtn.addEventListener('click', e => { e.stopPropagation(); speakResponse(result.response, ttsBtn); });
-
   card.querySelector('.wayback-btn').addEventListener('click', e => {
     e.stopPropagation();
     if (window.seance) {
@@ -371,36 +349,6 @@ function buildCard(result) {
   });
 
   return frag;
-}
-
-function speakResponse(text, btn) {
-  if (!('speechSynthesis' in window)) return;
-  if (currentSpeech) {
-    window.speechSynthesis.cancel();
-    currentSpeech = null;
-    if (btn.dataset.speaking === 'true') {
-      btn.dataset.speaking = 'false';
-      btn.textContent = '▶ Possess';
-      return;
-    }
-  }
-  document.querySelectorAll('.tts-btn').forEach(b => {
-    b.dataset.speaking = 'false';
-    b.textContent = '▶ Possess';
-  });
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.rate = parseFloat(ttsRate.value) || 0.9;
-  utterance.pitch = 0.7;
-  utterance.volume = 0.9;
-  utterance.onend = utterance.onerror = () => {
-    btn.dataset.speaking = 'false';
-    btn.textContent = '▶ Possess';
-    currentSpeech = null;
-  };
-  btn.dataset.speaking = 'true';
-  btn.textContent = '■ Exorcise';
-  currentSpeech = utterance;
-  window.speechSynthesis.speak(utterance);
 }
 
 async function openGrimoire() {
@@ -446,30 +394,11 @@ function closeModal() {
 }
 
 document.getElementById('btn-grimoire').addEventListener('click', openGrimoire);
-document.getElementById('btn-settings').addEventListener('click', () => openModal(settingsModal));
 document.getElementById('btn-grimoire-results').addEventListener('click', openGrimoire);
-document.getElementById('btn-settings-results').addEventListener('click', () => openModal(settingsModal));
 document.getElementById('btn-back').addEventListener('click', () => showView(viewSearch));
 
 modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
 document.querySelectorAll('.modal-close').forEach(btn => btn.addEventListener('click', closeModal));
 
-ttsRate.addEventListener('input', () => {
-  ttsRateLabel.textContent = `${parseFloat(ttsRate.value).toFixed(1)}x`;
-});
-
-saveSettingsBtn.addEventListener('click', async () => {
-  const settings = { ttsEnabled: ttsEnabled.checked ? 'true' : 'false', ttsRate: ttsRate.value };
-  if (window.seance) {
-    await window.seance.saveSettings(settings);
-  } else {
-    await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(settings) });
-  }
-  settingsSaved.classList.remove('hidden');
-  setTimeout(() => settingsSaved.classList.add('hidden'), 2000);
-});
-
 searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') performSummon(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-loadSettings();

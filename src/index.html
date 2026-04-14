@@ -28,7 +28,6 @@
     </div>
     <div id="header-actions">
       <button id="btn-grimoire" class="ghost-btn">☽ Grimoire</button>
-      <button id="btn-settings" class="ghost-btn">⚙ Settings</button>
     </div>
   </div>
 
@@ -50,7 +49,6 @@
       </div>
       <div class="results-actions">
         <button id="btn-grimoire-results" class="ghost-btn">☽ Grimoire</button>
-        <button id="btn-settings-results" class="ghost-btn">⚙ Settings</button>
       </div>
     </div>
     <div id="results-grid" class="results-grid"></div>
@@ -75,30 +73,6 @@
       </div>
     </div>
 
-    <div id="settings-modal" class="modal hidden">
-      <div class="modal-header">
-        <span class="modal-title">⚙ Settings</span>
-        <button class="modal-close">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="setting-group">
-          <label class="setting-label">Text-to-Speech</label>
-          <p class="setting-desc">Let the ghosts speak aloud through your device</p>
-          <label class="toggle-label">
-            <input type="checkbox" id="tts-enabled" />
-            <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            <span>Enable possession (TTS)</span>
-          </label>
-        </div>
-        <div class="setting-group">
-          <label class="setting-label">Voice Speed</label>
-          <input type="range" id="tts-rate" min="0.5" max="2" step="0.1" value="0.9" class="setting-range" />
-          <span id="tts-rate-label">0.9x</span>
-        </div>
-        <button id="save-settings-btn" class="btn-primary">Bind Settings</button>
-        <div id="settings-saved" class="hidden save-confirm">Settings bound to the grimoire.</div>
-      </div>
-    </div>
   </div>
 
   <template id="card-template">
@@ -118,7 +92,6 @@
           <span class="card-confidence"></span>
         </div>
         <div class="card-actions">
-          <button class="card-btn tts-btn">▶ Possess</button>
           <button class="card-btn wayback-btn">⌚ Wayback</button>
         </div>
       </div>
